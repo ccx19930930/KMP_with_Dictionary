@@ -87,14 +87,29 @@ int test2()
 	return 0;
 }
 
+void test3()
+{
+	ccx::Dictionary words;
+	words.leading_in();
+	
+	string s = "我要好好进行编程学习然后建一个编程编程编程学习网站给编程纩编程软件者使用进行编程训练";
+
+	words.Kmp(s);
+
+
+}
+
 int main()
 {
+#if 0
 	cout << "test1" << endl;
 	test1();
 	cout << endl;
-#if 0
 	cout << "test2" << endl;
 	test2();
 	cout << endl;
 #endif
+	cout << "test3" << endl;
+	test3();
+	cout << endl;
 }

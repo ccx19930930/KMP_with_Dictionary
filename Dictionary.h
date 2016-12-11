@@ -19,17 +19,22 @@ namespace ccx{
 using std::shared_ptr;
 using std::vector;
 using std::list;
+using std::pair;
 
 class Dictionary
 {
+	typedef pair<int, int> Loc;
 	typedef unordered_map<string, pDictElem>::iterator WordIt;
 	public:
 		Dictionary();
-		void push(const string & word);
-		void push(vector<string> & words);
-		bool search(const string & word);
-		bool associate(const string & word, vector<string> & data);
+		void push(const string & word);//插入
+		void push(vector<string> & words);//插入
+		bool search(const string & word);//查找
+		bool associate(const string & word, vector<string> & data);//联想
+		void Kmp(const string & word);
+
 	private:
+		bool Kmp(vector<string> & word, vector<Loc> & loc);
 		void getKmpNext(const vector<string> & characters, vector<int> & next);
 		void AddWord(const string & word);
 		void splitWord(const string & word, vector<string> & characters);//把词拆成字

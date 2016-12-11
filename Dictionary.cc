@@ -197,6 +197,69 @@ bool Dictionary::associate(const string & word, vector<string> & data)
 	return true;
 }
 
+void Dictionary::Kmp(const string & word)
+{
+	vector<string> temp;
+	splitWord(word, temp);
+	vector<Loc> loc;
+	
+	if(Kmp(temp, loc))
+	{
+		cout << word << endl;
+		int size = loc.size();
+		for(int i = 0; i < size; ++i)
+		{
+			cout << loc[i].first << " : " << loc[i].second << endl;
+		}
+	}
+}
+
+bool Dictionary::Kmp(vector<string> & word, vector<Loc> & loc)
+{
+	pDictElem root = _dictionary;
+	list<pDictElem> stackDict;
+
+	int start = 0;
+	int size = word.size();
+	int i = 0;
+	while(i < size)	
+	{
+		WordIt it_word;
+		it_word = root->_words.find(word[i]);
+		if(it_word == root->_words.end())
+		{
+			if(stackDict.size())
+			{
+				int num = root->_next;
+				for(int j = 0; j < num - 1; ++j)
+				{
+					stackDict.pop_back();	
+				}
+				root = stackDict.back();
+				stackDict.pop_back();
+				start += num;
+			}else{
+				++i;
+				start = i;
+			}
+			continue;
+		}else{
+			stackDict.push_back(root);
+			root = it_word->second;
+			if(root->_isend)
+			{
+				Loc loctemp;
+				loctemp.first = start;
+				loctemp.second = i;
+				loc.push_back(loctemp);
+				start = i + 1;
+			}
+		}
+		++i;
+	}
+	return loc.size();
+}
+
 //遍历用
 
 void Dictionary::resetPoint(pDictElem pcur)
