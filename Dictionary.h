@@ -27,10 +27,11 @@ class Dictionary
 		Dictionary();
 		void push(const string & word);
 		void push(vector<string> & words);
-		int search(const string & word);
+		bool search(const string & word);
 		bool associate(const string & word, vector<string> & data);
 	private:
-		void AddWord(const string & word, int wordId);
+		void getKmpNext(const vector<string> & characters, vector<int> & next);
+		void AddWord(const string & word);
 		void splitWord(const string & word, vector<string> & characters);//把词拆成字
 		int search(vector<string> & data, pDictElem & pcur);
 		pDictElem _dictionary;
@@ -40,7 +41,6 @@ class Dictionary
 	public:
 		string getCurChar();
 		string getCurWord();
-		int getCurWordId();
 		bool isEnd();
 		void resetIt();
 		void next();

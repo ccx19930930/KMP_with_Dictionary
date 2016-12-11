@@ -19,8 +19,9 @@ using std::shared_ptr;
 
 struct DictElem
 {
-	string _word;//如果是根结点，则填ROOT
-	int _next;//KMP next值
+	string _word;
+	bool _isend;//是否到词尾
+	int _next;//KMP next值 此处有修改，存的是弹栈数量
 	unordered_map<string, shared_ptr<DictElem> > _words;
 };
 

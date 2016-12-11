@@ -22,7 +22,8 @@ Dictionary::Dictionary()
 : _dictionary(new DictElem)
 , _conf()
 {
-	_dictionary->_wordId = 0;
+	_dictionary->_isend = false;
+	_dictionary->_next = 0;
 	_pcur = _dictionary;
 }
 
@@ -49,27 +50,60 @@ void Dictionary::splitWord(const string & word, vector<string> & characters)
 	}
 }
 
-void Dictionary::AddWord(const string & word, int wordId)
+void Dictionary::getKmpNext(const vector<string> & characters, vector<int> & kmpnext)
+{
+	int size = characters.size();
+	for(int i = 0; i < size; ++i)
+	{
+		kmpnext.push_back(0);
+	}
+	
+	int i = -1;
+	int j = 0;
+	kmpnext[0] = -1;
+	while(j < size)
+	{
+		if(i == -1 || kmpnext[i] == kmpnext[j])
+		{
+			++i;
+			++j;
+			kmpnext[j] = i;
+		}else{
+			i = kmpnext[i];
+		}
+	}
+	for(i = 0; i < size; ++i)
+	{
+		kmpnext[i] = i - kmpnext[i];
+	}
+}
+
+void Dictionary::AddWord(const string & word)
 {
 	vector<string> characters;
 	splitWord(word, characters);
-	
+	vector<int> kmpnext;
+	getKmpNext(characters, kmpnext);
+
+	vector<int>::iterator it_int;
+	it_int = kmpnext.begin();
 	vector<string>::iterator it_char;
 	it_char = characters.begin();	
 	pDictElem root;
 	root = _dictionary;
-	for(; it_char != characters.end(); ++it_char)
+	for(; it_char != characters.end(); ++it_char, ++it_int)
 	{
 		WordIt it_word;
 		it_word = root->_words.find(*it_char);
-		
+
 		if(it_word == root->_words.end())
 		{
 			pair<string, pDictElem> temp;
 			temp.first = *it_char;
 			pDictElem dictemp(new DictElem);
 			dictemp->_word = *it_char;
-			dictemp->_wordId = 0;
+			dictemp->_next = *it_int;
+			dictemp->_isend = false;
 			temp.second = dictemp;
 			root->_words.insert(temp);
 			root = dictemp;
@@ -77,16 +111,15 @@ void Dictionary::AddWord(const string & word, int wordId)
 			root = it_word->second;
 		}
 	}
-	if(!root->_wordId)
+	if(!root->_isend)
 	{
-		root->_wordId = wordId;
+		root->_isend = true;
 	}
 }
 
 void Dictionary::push(const string & word)
 {
-	++(_dictionary->_wordId);
-	AddWord(word, _dictionary->_wordId);
+	AddWord(word);
 }
 
 void Dictionary::push(vector<string> & words)
@@ -98,19 +131,19 @@ void Dictionary::push(vector<string> & words)
 	}
 }
 
-int Dictionary::search(const string & word)
+bool Dictionary::search(const string & word)
 {
 	pDictElem root = _dictionary;
 	vector<string> temp;
 	splitWord(word, temp);
-	
+
 	int ret = search(temp, root);
 	int size = temp.size();
 	if(ret != size)
 	{
-		return -1;
+		return false;
 	}
-	return root->_wordId;
+	return true;
 }
 
 int Dictionary::search(vector<string> & characters, pDictElem & root)
@@ -123,7 +156,7 @@ int Dictionary::search(vector<string> & characters, pDictElem & root)
 	{
 		WordIt it_word;
 		it_word = root->_words.find(*it_char);
-		
+
 		if(it_word == root->_words.end())
 		{
 			break;
@@ -139,14 +172,14 @@ bool Dictionary::associate(const string & word, vector<string> & data)
 	pDictElem root = _dictionary;
 	vector<string> temp;
 	splitWord(word, temp);
-	
+
 	int ret = search(temp, root);
 	int size = temp.size();
 	if(ret != size)
 	{
 		return false;
 	}
-	
+
 	list<WordIt> stackWord;
 	list<pDictElem> stackDict;
 	next(root, stackWord, stackDict);
@@ -156,7 +189,7 @@ bool Dictionary::associate(const string & word, vector<string> & data)
 		data.push_back(temp);	
 		next(root, stackWord, stackDict);
 	}
-	
+
 	if(!data.size())
 	{
 		return false;
@@ -195,7 +228,7 @@ void Dictionary::next(pDictElem & pcur, list<WordIt> & stackWord, list<pDictElem
 	while(pcur)
 	{
 		nextWord(pcur, stackWord, stackDict);
-		if(!pcur || pcur->_wordId)
+		if(!pcur || pcur->_isend)
 		{
 			break;
 		}
@@ -236,11 +269,6 @@ string Dictionary::getCurChar()
 	return _pcur->_word;
 }
 
-int Dictionary::getCurWordId()
-{
-	return _pcur->_wordId;
-}
-
 string Dictionary::getCurWord()
 {
 	return getCurWord(_stackWord);
@@ -275,7 +303,7 @@ void Dictionary::leading_in()//导入，失败没必要退出程序
 	}else{
 		Json::Value root;
 		Json::Reader reader;
-		
+
 		if(!reader.parse(ifs, root, false))
 		{
 			cout << "json read Dictionary.json error" << endl;
@@ -284,9 +312,7 @@ void Dictionary::leading_in()//导入，失败没必要退出程序
 			for(int i = 0; i < size; ++i)
 			{
 				string word = root[i]["Word"].asString();
-				int wordId = root[i]["WordId"].asInt();
-				AddWord(word, wordId);
-				++(_dictionary->_wordId);
+				AddWord(word);
 			}
 		}
 	}
@@ -298,19 +324,18 @@ void Dictionary::leading_out()
 	Json::FastWriter writer;
 
 	resetIt();
-	
+
 	while(!isEnd())
 	{
 		Json::Value elem;
 		elem["Word"] = getCurWord();
-		elem["WordId"] = getCurWordId();
 		root.append(elem);
 		next();
 	}
 
 	string words;
 	words = writer.write(root);
-	
+
 	ofstream ofs;
 	const char * path = _conf.getDictionaryPath().c_str();
 	ofs.open(path);
@@ -323,7 +348,7 @@ void Dictionary::leading_out()
 			exit(EXIT_FAILURE);
 		}
 	}
-	
+
 	ofs << words;
 	ofs.close();
 }
