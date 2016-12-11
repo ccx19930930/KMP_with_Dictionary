@@ -5,10 +5,13 @@
  ///
 
 #include "Dictionary.h"
+#include <json/json.h>
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <json/json.h>
+#include <algorithm>
+
+#define PLAN1
 
 namespace ccx{
 
@@ -197,10 +200,23 @@ bool Dictionary::associate(const string & word, vector<string> & data)
 	return true;
 }
 
+#ifdef PLAN1
+//敏感词中带空格的第一种方案
+bool deleterule(string & word)
+{
+	return word == " ";
+}
+#endif
+
 string Dictionary::Kmp(const string & word)
 {
 	vector<string> temp;
 	splitWord(word, temp);
+	
+#ifdef PLAN1
+	temp.erase(std::remove_if(temp.begin(), temp.end(), deleterule));
+#endif
+
 	vector<Loc> loc;
 	
 	if(!Kmp(temp, loc))
@@ -233,6 +249,18 @@ bool Dictionary::Kmp(vector<string> & word, vector<Loc> & loc)
 	int i = 0;
 	while(i < size)	
 	{
+#ifdef PLAN2
+//敏感词中带空格的第二种方案
+		if(word[i] == " ")
+		{
+			++i;
+			if(!stackDict.size())
+			{
+				++start;
+			}
+			continue;
+		}
+#endif
 		WordIt it_word;
 		it_word = root->_words.find(word[i]);
 		if(it_word == root->_words.end())

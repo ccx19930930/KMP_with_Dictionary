@@ -91,7 +91,7 @@ void test3()
 	ccx::Dictionary words;
 	words.leading_in();
 	
-	string s = "我不要好好玩耍好好进行编程学习然后建一个编程编程编程学习网站给编程纩编程软件者使用进行编程训练与编程学习";
+	string s = "我不要好好 玩耍好好进行编程学习然后建一个编程编程编程学    习网站给编程纩编程软件者使用进行编程训练与编程学习";
 
 	cout << s << endl;
 	s = words.Kmp(s);
