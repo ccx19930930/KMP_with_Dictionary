@@ -1,6 +1,5 @@
  ///
- /// @file    test.cc
- /// @author  chinxi(chenchengxi993@gmail.com)
+ /// @file    test.cc /// @author  chinxi(chenchengxi993@gmail.com)
  /// @date    2016-12-03 11:06:16
  ///
 
@@ -92,11 +91,11 @@ void test3()
 	ccx::Dictionary words;
 	words.leading_in();
 	
-	string s = "我要好好进行编程学习然后建一个编程编程编程学习网站给编程纩编程软件者使用进行编程训练";
+	string s = "我不要好好玩耍好好进行编程学习然后建一个编程编程编程学习网站给编程纩编程软件者使用进行编程训练与编程学习";
 
-	words.Kmp(s);
-
-
+	cout << s << endl;
+	s = words.Kmp(s);
+	cout << s << endl;
 }
 
 int main()

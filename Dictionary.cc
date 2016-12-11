@@ -197,21 +197,30 @@ bool Dictionary::associate(const string & word, vector<string> & data)
 	return true;
 }
 
-void Dictionary::Kmp(const string & word)
+string Dictionary::Kmp(const string & word)
 {
 	vector<string> temp;
 	splitWord(word, temp);
 	vector<Loc> loc;
 	
-	if(Kmp(temp, loc))
+	if(!Kmp(temp, loc))
 	{
-		cout << word << endl;
-		int size = loc.size();
-		for(int i = 0; i < size; ++i)
+		return word;
+	}
+	int size = loc.size();
+	for(int i = 0; i < size; ++i)
+	{
+		for(int j = loc[i].first; j <= loc[i].second; ++j)
 		{
-			cout << loc[i].first << " : " << loc[i].second << endl;
+			temp[j] = "*";
 		}
 	}
+	string ret;
+	for(auto & elem : temp)
+	{
+		ret += elem;
+	}
+	return ret;
 }
 
 bool Dictionary::Kmp(vector<string> & word, vector<Loc> & loc)

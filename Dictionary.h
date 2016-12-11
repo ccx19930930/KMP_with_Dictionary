@@ -31,7 +31,7 @@ class Dictionary
 		void push(vector<string> & words);//插入
 		bool search(const string & word);//查找
 		bool associate(const string & word, vector<string> & data);//联想
-		void Kmp(const string & word);
+		string Kmp(const string & word);
 
 	private:
 		bool Kmp(vector<string> & word, vector<Loc> & loc);
